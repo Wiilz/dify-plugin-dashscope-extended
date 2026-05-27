@@ -1,0 +1,17 @@
+[project]
+name = "dashscope-extended"
+version = "0.1.0"
+description = "DashScope 高级 LLM 插件，支持精细化参数控制"
+readme = "README.md"
+requires-python = ">=3.12"
+
+dependencies = [
+    "dify_plugin>=0.5.0",
+    "dashscope~=1.25.2",
+    "openai~=2.3.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]

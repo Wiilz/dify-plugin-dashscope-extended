@@ -1,0 +1,143 @@
+model: qwen3.6-plus
+label:
+  en_US: qwen3.6-plus
+  zh_Hans: qwen3.6-plus
+model_type: llm
+features:
+  - vision
+  - multi-tool-call
+  - agent-thought
+  - stream-tool-call
+model_properties:
+  mode: chat
+  context_size: 1000000
+parameter_rules:
+  - name: temperature
+    use_template: temperature
+    type: float
+    default: 0.3
+    min: 0.0
+    max: 2.0
+    help:
+      zh_Hans: 用于控制随机性和多样性的程度。较高的值使输出更多样化，较低的值使输出更确定。
+      en_US: Controls randomness and diversity. Higher values increase diversity, lower values increase certainty.
+  - name: max_tokens
+    use_template: max_tokens
+    type: int
+    default: 8192
+    min: 1
+    max: 65536
+    help:
+      zh_Hans: 生成内容的最大 token 数量，定义生成上限，不保证每次达到该数量。
+      en_US: Maximum number of tokens in generated content. Defines the upper limit.
+  - name: top_p
+    use_template: top_p
+    type: float
+    default: 0.8
+    min: 0.1
+    max: 0.9
+    help:
+      zh_Hans: 核采样概率阈值，取值越大随机性越高，取值越低确定性越高。
+      en_US: Nucleus sampling probability threshold. Higher values increase randomness.
+  - name: top_k
+    type: int
+    min: 0
+    max: 99
+    label:
+      zh_Hans: 取样数量
+      en_US: Top k
+    help:
+      zh_Hans: 采样候选集的大小。取值越大随机性越高，取值越小确定性越高。
+      en_US: Size of the sample candidate set. Larger values increase randomness.
+  - name: seed
+    required: false
+    type: int
+    default: 1234
+    label:
+      zh_Hans: 随机种子
+      en_US: Random seed
+    help:
+      zh_Hans: 随机数种子，控制生成内容的随机性。使用相同种子时模型将尽可能生成相同结果。
+      en_US: Random seed for reproducibility.
+  - name: repetition_penalty
+    required: false
+    type: float
+    default: 1.1
+    label:
+      zh_Hans: 重复惩罚
+      en_US: Repetition penalty
+    help:
+      zh_Hans: 控制模型生成时的重复度。1.0 表示不做惩罚。
+      en_US: Controls repetition in generation. 1.0 means no penalty.
+  - name: enable_search
+    type: boolean
+    default: false
+    label:
+      zh_Hans: 联网搜索
+      en_US: Web Search
+    help:
+      zh_Hans: 控制模型在生成文本时是否参考互联网搜索结果。
+      en_US: Whether to reference web search results during generation.
+  - name: search_options
+    required: false
+    type: string
+    label:
+      zh_Hans: 联网搜索高级选项（JSON）
+      en_US: Search Options (JSON)
+    help:
+      zh_Hans: |
+        联网搜索的精细化配置，JSON 格式。需先开启"联网搜索"。示例：
+        {"forced_search": true, "search_strategy": "max", "assigned_site_list": ["baike.baidu.com"]}
+        支持字段：enable_source, enable_citation, forced_search, search_strategy, intention_options, enable_search_extension, assigned_site_list
+      en_US: |
+        Advanced web search options in JSON format. Requires "Web Search" enabled.
+  - name: enable_thinking
+    required: false
+    type: boolean
+    default: false
+    label:
+      zh_Hans: 深度思考
+      en_US: Deep Thinking
+    help:
+      zh_Hans: 开启模型的深度思考模式，模型会先进行推理分析再给出回答。适用于复杂推理、数学、代码等场景。
+      en_US: Enable deep thinking mode. The model will reason before answering.
+  - name: thinking_budget
+    required: false
+    type: int
+    default: 2048
+    min: 1
+    max: 81920
+    label:
+      zh_Hans: 思考长度限制
+      en_US: Thinking budget
+    help:
+      zh_Hans: 思考过程的最大 token 长度，只在深度思考为 true 时生效。
+      en_US: Maximum length of the thinking process, only effective when deep thinking is enabled.
+  - name: parallel_tool_calls
+    required: false
+    type: boolean
+    default: true
+    label:
+      zh_Hans: 并行工具调用
+      en_US: Parallel Tool Calls
+    help:
+      zh_Hans: 是否允许模型在一次回复中并行调用多个工具。
+      en_US: Allow the model to call multiple tools in parallel.
+  - name: response_format
+    label:
+      zh_Hans: 回复格式
+      en_US: Response Format
+    type: string
+    help:
+      zh_Hans: 指定模型必须输出的格式
+      en_US: Specify the output format
+    required: false
+    options:
+      - text
+      - message
+      - json_object
+pricing:
+  input: '0.0008'
+  output: '0.0048'
+  unit: '0.001'
+  currency: RMB

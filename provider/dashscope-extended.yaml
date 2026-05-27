@@ -1,0 +1,109 @@
+provider: dashscope-extended
+label:
+  en_US: "DashScope Extended"
+  zh_Hans: "DashScope Extended"
+description:
+  en_US: "Advanced LLM plugin for DashScope with fine-grained parameter control (deep thinking, search options, parallel tool calls)."
+  zh_Hans: "DashScope 自定义 LLM 插件，支持自定义参数控制。"
+icon_small:
+  en_US: "icon.svg"
+icon_large:
+  en_US: "icon.svg"
+background: "#E5E7EB"
+help:
+  title:
+    en_US: "Get your API Key from Alibaba Cloud DashScope"
+    zh_Hans: "从阿里云 DashScope 获取 API Key"
+  url:
+    en_US: "https://dashscope.console.aliyun.com/apiKey"
+    zh_Hans: "https://dashscope.console.aliyun.com/apiKey"
+supported_model_types:
+  - llm
+configurate_methods:
+  - predefined-model
+  - customizable-model
+provider_credential_schema:
+  credential_form_schemas:
+    - variable: dashscope_api_key
+      label:
+        en_US: API Key
+        zh_Hans: API Key
+      type: secret-input
+      required: true
+      placeholder:
+        zh_Hans: 在此输入您的 DashScope API Key
+        en_US: Enter your DashScope API Key
+    - variable: use_international_endpoint
+      label:
+        en_US: Use International Endpoint
+        zh_Hans: 使用国际站端点
+      type: radio
+      required: false
+      default: "false"
+      options:
+        - value: "true"
+          label:
+            en_US: "Yes"
+            zh_Hans: 是
+        - value: "false"
+          label:
+            en_US: "No"
+            zh_Hans: 否
+model_credential_schema:
+  model:
+    label:
+      en_US: Model Name
+      zh_Hans: 模型名称
+    placeholder:
+      en_US: Enter your model name
+      zh_Hans: 输入模型名称
+  credential_form_schemas:
+    - variable: dashscope_api_key
+      label:
+        en_US: API Key
+        zh_Hans: API Key
+      type: secret-input
+      required: true
+      placeholder:
+        zh_Hans: 在此输入您的 DashScope API Key
+        en_US: Enter your DashScope API Key
+    - variable: context_size
+      label:
+        en_US: Context Size
+        zh_Hans: 上下文大小
+      type: text-input
+      required: false
+      default: "8000"
+    - variable: max_tokens
+      label:
+        en_US: Max Tokens
+        zh_Hans: 最大 Token 数
+      type: text-input
+      required: false
+      default: "4096"
+    - variable: function_calling_type
+      label:
+        en_US: Function Calling
+        zh_Hans: 函数调用方式
+      type: select
+      required: false
+      default: no_call
+      options:
+        - value: no_call
+          label:
+            en_US: Not Supported
+            zh_Hans: 不支持
+        - value: tool_call
+          label:
+            en_US: Tool Call
+            zh_Hans: Tool Call
+models:
+  llm:
+    predefined:
+      - "models/llm/*.yaml"
+    position: "models/llm/_position.yaml"
+extra:
+  python:
+    provider_source: provider/dashscope-extended.py
+    model_sources:
+      - "models/llm/llm.py"
