@@ -378,8 +378,8 @@ wheels = [
 ]
 
 [[package]]
-name = "dashscope-advanced"
-version = "0.1.0"
+name = "dashscope-extended"
+version = "0.1.1"
 source = { virtual = "." }
 dependencies = [
     { name = "dashscope" },

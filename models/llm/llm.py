@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 import os
+import sys
 import tempfile
 import uuid
 from collections.abc import Generator
@@ -65,9 +66,26 @@ from openai import OpenAI
 from models._common import get_http_base_address
 from dify_plugin.config.logger_format import plugin_logger_handler
 
+
+class _Utf8Formatter(logging.Formatter):
+    def format(self, record):
+        return json.dumps({
+            "event": "log",
+            "data": {
+                "level": record.levelname,
+                "message": record.getMessage(),
+                "timestamp": record.created,
+            },
+        }, ensure_ascii=False)
+
+
+_handler = logging.StreamHandler(sys.stdout)
+_handler.setLevel(logging.INFO)
+_handler.setFormatter(_Utf8Formatter())
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-logger.addHandler(plugin_logger_handler)
+logger.addHandler(_handler)
 
 
 class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
@@ -78,15 +96,15 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
         self._temp_files = []
 
     def _invoke(
-        self,
-        model: str,
-        credentials: dict,
-        prompt_messages: list[PromptMessage],
-        model_parameters: dict,
-        tools: Optional[list[PromptMessageTool]] = None,
-        stop: Optional[list[str]] = None,
-        stream: bool = True,
-        user: Optional[str] = None,
+            self,
+            model: str,
+            credentials: dict,
+            prompt_messages: list[PromptMessage],
+            model_parameters: dict,
+            tools: Optional[list[PromptMessageTool]] = None,
+            stop: Optional[list[str]] = None,
+            stream: bool = True,
+            user: Optional[str] = None,
     ) -> Union[LLMResult, Generator]:
         return self._generate(
             model, credentials, prompt_messages, model_parameters,
@@ -94,11 +112,11 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
         )
 
     def get_num_tokens(
-        self,
-        model: str,
-        credentials: dict,
-        prompt_messages: list[PromptMessage],
-        tools: Optional[list[PromptMessageTool]] = None,
+            self,
+            model: str,
+            credentials: dict,
+            prompt_messages: list[PromptMessage],
+            tools: Optional[list[PromptMessageTool]] = None,
     ) -> int:
         if self.get_customizable_model_schema(model, credentials) is not None:
             return 0
@@ -126,15 +144,15 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
             raise CredentialsValidateFailedError(str(ex))
 
     def _generate(
-        self,
-        model: str,
-        credentials: dict,
-        prompt_messages: list[PromptMessage],
-        model_parameters: dict,
-        tools: Optional[list[PromptMessageTool]] = None,
-        stop: Optional[list[str]] = None,
-        stream: bool = True,
-        user: Optional[str] = None,
+            self,
+            model: str,
+            credentials: dict,
+            prompt_messages: list[PromptMessage],
+            model_parameters: dict,
+            tools: Optional[list[PromptMessageTool]] = None,
+            stop: Optional[list[str]] = None,
+            stream: bool = True,
+            user: Optional[str] = None,
     ) -> Union[LLMResult, Generator]:
         credentials_kwargs = {"api_key": credentials["dashscope_api_key"]}
         model_schema = self.get_model_schema(model, credentials)
@@ -158,8 +176,8 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
 
         # search_options: 解析 JSON 字符串为 dict（兼容 Dify 对 text 类型参数自动加 _json 后缀的行为）
         search_options_str = (
-            model_parameters.pop("search_options", None)
-            or model_parameters.pop("search_options_json", None)
+                model_parameters.pop("search_options", None)
+                or model_parameters.pop("search_options_json", None)
         )
         if search_options_str:
             try:
@@ -196,7 +214,8 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
             )
             # 打印完整请求参数（隐藏 api_key）
             log_params = {k: v for k, v in params.items() if k != "api_key"}
-            logger.info(f"[dashscope-extended] MultiModalConversation 请求参数: {json.dumps(log_params, ensure_ascii=False, default=str)}")
+            logger.info(
+                f"[dashscope-extended] MultiModalConversation 请求参数: {json.dumps(log_params, ensure_ascii=False, default=str)}")
             response = MultiModalConversation.call(
                 **params,
                 stream=True,
@@ -209,7 +228,8 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
             )
             # 打印完整请求参数（隐藏 api_key）
             log_params = {k: v for k, v in params.items() if k != "api_key"}
-            logger.info(f"[dashscope-extended] Generation 请求参数: {json.dumps(log_params, ensure_ascii=False, default=str)}")
+            logger.info(
+                f"[dashscope-extended] Generation 请求参数: {json.dumps(log_params, ensure_ascii=False, default=str)}")
             response = Generation.call(
                 **params,
                 result_format="message",
@@ -223,11 +243,11 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
         )
 
     def _handle_generate_response(
-        self,
-        model: str,
-        credentials: dict,
-        response: GenerationResponse,
-        prompt_messages: list[PromptMessage],
+            self,
+            model: str,
+            credentials: dict,
+            response: GenerationResponse,
+            prompt_messages: list[PromptMessage],
     ) -> LLMResult:
         try:
             if response.status_code not in {200, HTTPStatus.OK}:
@@ -278,11 +298,11 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
                             tool_call_obj["function"]["arguments"] = args
 
     def _handle_generate_stream_response(
-        self,
-        model: str,
-        credentials: dict,
-        responses: Generator[GenerationResponse, None, None],
-        prompt_messages: list[PromptMessage],
+            self,
+            model: str,
+            credentials: dict,
+            responses: Generator[GenerationResponse, None, None],
+            prompt_messages: list[PromptMessage],
     ) -> Generator:
         is_reasoning = False
         tool_calls = []
@@ -398,10 +418,10 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
         return text.rstrip()
 
     def _convert_prompt_messages_to_tongyi_messages(
-        self,
-        credentials: dict,
-        prompt_messages: list[PromptMessage],
-        rich_content: bool = False,
+            self,
+            credentials: dict,
+            prompt_messages: list[PromptMessage],
+            rich_content: bool = False,
     ) -> list[dict]:
         tongyi_messages = []
         for prompt_message in prompt_messages:
@@ -504,7 +524,7 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
         self._temp_files.clear()
 
     def _upload_file_to_dashscope(
-        self, credentials: dict, message_content: DocumentPromptMessageContent
+            self, credentials: dict, message_content: DocumentPromptMessageContent
     ) -> str:
         base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
         if credentials.get("use_international_endpoint", "false") == "true":
@@ -565,7 +585,7 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
         return tool_definitions
 
     def _wrap_thinking_by_reasoning_content(
-        self, delta: dict, is_reasoning: bool
+            self, delta: dict, is_reasoning: bool
     ) -> tuple[str, bool]:
         content = delta.get("content") or ""
         if isinstance(content, list) and content:
@@ -597,7 +617,7 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
         return content, is_reasoning
 
     def _handle_error_response(
-        self, status_code: int, message: str, model: str = None, request_id: str = None
+            self, status_code: int, message: str, model: str = None, request_id: str = None
     ) -> None:
         error_msg = f"Failed to invoke model {model}, status_code: {status_code}, message: {message}" if model else message
         if request_id:
@@ -629,7 +649,7 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
         }
 
     def get_customizable_model_schema(
-        self, model: str, credentials: dict
+            self, model: str, credentials: dict
     ) -> Optional[AIModelEntity]:
         return AIModelEntity(
             model=model,
