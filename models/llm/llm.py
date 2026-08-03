@@ -198,6 +198,16 @@ class DashscopeExtendedLargeLanguageModel(LargeLanguageModel):
         if enable_thinking is not None:
             extra_model_kwargs["enable_thinking"] = enable_thinking
 
+        # reasoning_effort 与 thinking_budget 互斥（qwen3.8-max 等模型同时设置会报错）。
+        # reasoning_effort 带默认值会被每次下发，而 thinking_budget 需用户显式填写，
+        # 因此两者并存时以用户显式填写的 thinking_budget 为准。
+        if model_parameters.get("reasoning_effort") and model_parameters.get("thinking_budget"):
+            model_parameters.pop("reasoning_effort")
+            logger.info(
+                "[dashscope-extended] reasoning_effort 与 thinking_budget 互斥，"
+                "已保留 thinking_budget 并忽略 reasoning_effort。"
+            )
+
         params = {
             "model": model,
             **model_parameters,

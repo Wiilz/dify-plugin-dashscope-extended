@@ -1,0 +1,188 @@
+# qwen3.8-max：2.4 万亿参数 MoE 旗舰模型，原生支持视觉理解与深度思考
+# 规格来源：阿里云百炼模型广场 https://bailian.console.aliyun.com/#/model-market/detail/qwen3.8-max
+# 上下文 1M / 最大输入 991K（思考模式 983K）/ 最大输出 128K / 最大思维链 256K
+model: qwen3.8-max
+label:
+  en_US: qwen3.8-max
+  zh_Hans: qwen3.8-max
+model_type: llm
+features:
+  - vision
+  - multi-tool-call
+  - agent-thought
+  - stream-tool-call
+model_properties:
+  mode: chat
+  context_size: 1000000
+parameter_rules:
+  - name: temperature
+    use_template: temperature
+    type: float
+    default: 0.3
+    min: 0.0
+    max: 2.0
+    help:
+      zh_Hans: 用于控制随机性和多样性的程度。较高的值使输出更多样化，较低的值使输出更确定。
+      en_US: Controls randomness and diversity. Higher values increase diversity, lower values increase certainty.
+  - name: max_tokens
+    use_template: max_tokens
+    type: int
+    default: 8192
+    min: 1
+    max: 131072
+    help:
+      zh_Hans: 模型回答的最大 token 数量（不含思维链）。定义生成上限，不保证每次达到该数量。
+      en_US: Maximum number of tokens in the model's answer (excluding chain-of-thought). Defines the upper limit.
+  - name: max_completion_tokens
+    required: false
+    type: int
+    min: 1
+    max: 131072
+    label:
+      zh_Hans: 最大输出长度（含思维链）
+      en_US: Max completion tokens
+    help:
+      zh_Hans: 模型完整输出的最大长度，包含思维链与回答。思考类模型推荐使用该参数替代 max_tokens。留空则使用模型默认值 131072。
+      en_US: Maximum length of the full model output including chain-of-thought and answer. Recommended over max_tokens for thinking models.
+  - name: top_p
+    use_template: top_p
+    type: float
+    default: 0.8
+    min: 0.1
+    max: 0.9
+    help:
+      zh_Hans: 核采样概率阈值，取值越大随机性越高，取值越低确定性越高。
+      en_US: Nucleus sampling probability threshold. Higher values increase randomness.
+  - name: top_k
+    type: int
+    min: 0
+    max: 99
+    label:
+      zh_Hans: 取样数量
+      en_US: Top k
+    help:
+      zh_Hans: 采样候选集的大小。取值越大随机性越高，取值越小确定性越高。
+      en_US: Size of the sample candidate set. Larger values increase randomness.
+  - name: seed
+    required: false
+    type: int
+    default: 1234
+    label:
+      zh_Hans: 随机种子
+      en_US: Random seed
+    help:
+      zh_Hans: 随机数种子，控制生成内容的随机性。使用相同种子时模型将尽可能生成相同结果。
+      en_US: Random seed for reproducibility.
+  - name: repetition_penalty
+    required: false
+    type: float
+    default: 1.1
+    label:
+      zh_Hans: 重复惩罚
+      en_US: Repetition penalty
+    help:
+      zh_Hans: 控制模型生成时的重复度。1.0 表示不做惩罚。
+      en_US: Controls repetition in generation. 1.0 means no penalty.
+  - name: presence_penalty
+    required: false
+    type: float
+    min: -2.0
+    max: 2.0
+    label:
+      zh_Hans: 内容重复度惩罚
+      en_US: Presence penalty
+    help:
+      zh_Hans: 控制生成内容的重复度。正值降低重复度，负值增加重复度。创意写作场景建议调高，技术文档场景建议调低。
+      en_US: Controls content repetition. Positive values reduce repetition, negative values increase it.
+  - name: enable_search
+    type: boolean
+    default: false
+    label:
+      zh_Hans: 联网搜索
+      en_US: Web Search
+    help:
+      zh_Hans: 控制模型在生成文本时是否参考互联网搜索结果。
+      en_US: Whether to reference web search results during generation.
+  - name: search_options
+    required: false
+    type: string
+    label:
+      zh_Hans: 联网搜索高级选项（JSON）
+      en_US: Search Options (JSON)
+    help:
+      zh_Hans: |
+        联网搜索的精细化配置，JSON 格式。需先开启"联网搜索"。示例：
+        {"forced_search": true, "search_strategy": "max", "assigned_site_list": ["baike.baidu.com"]}
+        支持字段：enable_source, enable_citation, forced_search, search_strategy, intention_options, enable_search_extension, assigned_site_list
+      en_US: |
+        Advanced web search options in JSON format. Requires "Web Search" enabled.
+  - name: enable_thinking
+    required: false
+    type: boolean
+    default: true
+    label:
+      zh_Hans: 深度思考
+      en_US: Deep Thinking
+    help:
+      zh_Hans: 本模型默认开启深度思考，模型会先进行推理分析再给出回答。关闭后推理力度设置将不再生效。
+      en_US: This model enables deep thinking by default. Turning it off disables the reasoning effort setting.
+  - name: reasoning_effort
+    required: false
+    type: string
+    default: xhigh
+    label:
+      zh_Hans: 推理力度
+      en_US: Reasoning effort
+    help:
+      zh_Hans: |
+        控制思考的深度，仅在开启深度思考时生效。对应的思考长度：low 为 4096，medium 为 16384，xhigh 为 262144。
+        注意：该参数与"思考长度限制"互斥，两者同时设置会报错，请只使用其中一个。
+      en_US: |
+        Controls reasoning depth (only effective when deep thinking is on). Maps to thinking budget: low=4096, medium=16384, xhigh=262144.
+        Note: mutually exclusive with "thinking budget" — setting both will raise an error.
+    options:
+      - low
+      - medium
+      - xhigh
+  - name: thinking_budget
+    required: false
+    type: int
+    min: 1
+    max: 262144
+    label:
+      zh_Hans: 思考长度限制
+      en_US: Thinking budget
+    help:
+      zh_Hans: |
+        思考过程的最大 token 长度，只在开启深度思考时生效。留空则使用默认值 131072。
+        注意：该参数与"推理力度"互斥，两者同时设置会报错。若需使用本参数，请勿同时设置推理力度。
+      en_US: |
+        Maximum length of the thinking process, only effective when deep thinking is on. Defaults to 131072 if left empty.
+        Note: mutually exclusive with "reasoning effort" — setting both will raise an error.
+  - name: parallel_tool_calls
+    required: false
+    type: boolean
+    default: true
+    label:
+      zh_Hans: 并行工具调用
+      en_US: Parallel Tool Calls
+    help:
+      zh_Hans: 是否允许模型在一次回复中并行调用多个工具。
+      en_US: Allow the model to call multiple tools in parallel.
+  - name: response_format
+    label:
+      zh_Hans: 回复格式
+      en_US: Response Format
+    type: string
+    help:
+      zh_Hans: 指定模型必须输出的格式
+      en_US: Specify the output format
+    required: false
+    options:
+      - text
+      - json_object
+pricing:
+  input: '0.012'
+  output: '0.036'
+  unit: '0.001'
+  currency: RMB
